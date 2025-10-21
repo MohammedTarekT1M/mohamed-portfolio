@@ -25,7 +25,7 @@
           </div>
     
           <div class="project-grid">
-            <article class="project" data-category="school" data-preview="vid/hogerlager.mp4">
+            <article class="project" data-category="school" data-preview="vid/escape room.mp4">
               <img class="proj-thumb" src="img/begin.png" alt="Escape Room thumbnail">
               <h3>Escape Room</h3>
               <p class="proj-desc">A simple escape room game with some challenges and puzzles.</p>
@@ -47,7 +47,7 @@
               </div>
             </article>
     
-            <article class="project" data-category="school">
+            <article class="project" data-category="school" data-preview="vid/gamehub.mp4">
               <img class="proj-thumb" src="img/gamehub.png" alt="GameHub thumbnail">
               <h3>GameHub</h3>
               <p class="proj-desc">A web platform showcasing small games.</p>
@@ -58,7 +58,7 @@
               </div>
             </article>
     
-            <article class="project" data-category="school">
+            <article class="project" data-category="school" data-preview="vid/games4u.mp4">
               <img class="proj-thumb" src="img/games4u.png" alt="Games4U thumbnail">
               <h3>Games4U</h3>
               <p class="proj-desc">A web platform that displays game trailers and information about them.</p>
@@ -91,7 +91,7 @@
               </div>
             </article>
     
-            <article class="project" data-category="school">
+            <article class="project" data-category="school" data-preview="vid/men.mp4">
               <img class="proj-thumb" src="img/men.png" alt="Apache Webserver Exam thumbnail">
               <h3>Mens Erger Je Niet</h3>
               <p class="proj-desc">A website to play Ludo with friends</p>
@@ -113,7 +113,7 @@
                 </div>
               </article>
 
-              <article class="project" data-category="side">
+              <article class="project" data-category="side" data-preview="vid/draft.mp4">
                 <img class="proj-thumb" src="img/fut-draft.jpg" alt="Apache Webserver Exam thumbnail">
                 <h3>Fut Draft</h3>
                 <p class="proj-desc">Fifa Fut Draft</p>
@@ -124,7 +124,7 @@
                 </div>
               </article>
 
-              <article class="project" data-category="side">
+              <article class="project" data-category="side" data-preview="vid/moflix.mp4">
                 <img class="proj-thumb" src="img/moflix.png" alt="Apache Webserver Exam thumbnail">
                 <h3>Moflix</h3>
                 <p class="proj-desc">Video streaming site</p>
@@ -135,8 +135,8 @@
                 </div>
               </article>
 
-              <article class="project" data-category="side">
-                <img class="proj-thumb" src="img/barca.png" alt="Apache Webserver Exam thumbnail">
+              <article class="project" data-category="side" data-preview="vid/barca.mp4">
+                <img class="proj-thumb" src="img/barcelona-logo.jpg" alt="Apache Webserver Exam thumbnail">
                 <h3>Barca</h3>
                 <p class="proj-desc">Barcelona squad site</p>
                 <p class="tags">Technologies: HTML / CSS / JavaScript</p>
@@ -146,7 +146,7 @@
                 </div>
               </article>
 
-              <article class="project" data-category="side">
+              <article class="project" data-category="side" data-preview="vid/win11.mp4">
                 <img class="proj-thumb" src="img/win11.jpg" alt="Apache Webserver Exam thumbnail">
                 <h3>Window 11</h3>
                 <p class="proj-desc">Windows 11 Desktop Simulator Site</p>
@@ -165,6 +165,17 @@
                 <div class="proj-actions">
                   <a class="btn small" href="https://github.com/MohammedTarekT1M/spiderman.git" target="_blank">GitHub</a>
                   <a class="btn small ghost" href="https://mohammedtarekt1m.github.io/spiderman/" target="_blank">Live Demo</a>
+                </div>
+              </article>
+
+              <article class="project" data-category="side">
+                <img class="proj-thumb" src="img/fifa logo.jpg" alt="Apache Webserver Exam thumbnail">
+                <h3>FIFA Evolution</h3>
+                <p class="proj-desc">Website for all FIFA game </p>
+                <p class="tags">Technologies: HTML / CSS / JavaScript</p>
+                <div class="proj-actions">
+                  <a class="btn small" href="https://github.com/MohammedTarekT1M/fifa-evolution.git" target="_blank">GitHub</a>
+                  <a class="btn small ghost" href="https://mohammedtarekt1m.github.io/fifa-evolution/" target="_blank">Live Demo</a>
                 </div>
               </article>
           </div>
@@ -269,6 +280,7 @@
         // Video preview on hover for project tiles
     (function() {
       const projectTiles = document.querySelectorAll('.project[data-preview]');
+      let activeTile = null;
 
       projectTiles.forEach(tile => {
         const previewSrc = tile.getAttribute('data-preview');
@@ -287,13 +299,12 @@
         let playTimeout = null;
 
         const startPreview = () => {
-          // Delay start slightly to avoid accidental tiny hovers
           playTimeout = setTimeout(() => {
             tile.classList.add('playing');
             video.classList.add('visible');
-            // try to play; muted allows autoplay on most browsers
             const p = video.play();
             if (p && p.catch) p.catch(() => {});
+            activeTile = tile;
           }, 150);
         };
 
@@ -302,6 +313,7 @@
           tile.classList.remove('playing');
           video.classList.remove('visible');
           try { video.pause(); video.currentTime = 0; } catch(e) {}
+          if (activeTile === tile) activeTile = null;
         };
 
         tile.addEventListener('mouseenter', startPreview);
@@ -317,6 +329,33 @@
             setTimeout(() => { touched = false; }, 800);
           }
         });
+      });
+
+      // Stop previews when tapping/clicking outside any preview tile (mobile/tablet UX)
+      const stopAllPreviews = () => {
+        projectTiles.forEach(t => {
+          const v = t.querySelector('.proj-video');
+          if (t.classList.contains('playing')) {
+            t.classList.remove('playing');
+            if (v) { try { v.pause(); v.currentTime = 0; } catch(e) {} v.classList.remove('visible'); }
+          }
+        });
+        activeTile = null;
+      };
+
+      document.addEventListener('touchstart', (e) => {
+        const clickedTile = e.target.closest('.project[data-preview]');
+        if (!clickedTile) {
+          stopAllPreviews();
+        } else if (clickedTile !== activeTile) {
+          stopAllPreviews();
+        }
+      }, { passive: true });
+
+      // Also handle mouse clicks outside on tablets or desktops where click is used
+      document.addEventListener('click', (e) => {
+        const clickedTile = e.target.closest('.project[data-preview]');
+        if (!clickedTile) stopAllPreviews();
       });
     })();
     </script>
